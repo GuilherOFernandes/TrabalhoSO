@@ -41,7 +41,7 @@ def programador(id_prog, gerenciador):
     while True:
         definir_estado(id_prog, "Pensando")
         imprimir(f"Programador {id_prog}: Pensando/descansando.")
-        time.sleep(random.uniform(5, 8))
+        time.sleep(random.uniform(10, 15))
 
         definir_estado(id_prog, "Esperando recursos")
         imprimir(f"Programador {id_prog}: Vai pedir compilador + BD (fila).")
@@ -49,18 +49,22 @@ def programador(id_prog, gerenciador):
 
         definir_estado(id_prog, "Compilando")
         imprimir(f"Programador {id_prog}: RECEBEU compilador + BD -> Compilando.")
-        time.sleep(random.uniform(8, 12))
+        time.sleep(random.uniform(12, 18))
 
         imprimir(f"Programador {id_prog}: Terminou compilação. Liberando recursos.")
         gerenciador.liberar_recursos()
 
-        time.sleep(random.uniform(2, 3))
+        time.sleep(random.uniform(3, 5))
 
-def monitorar(periodo=4.0):
+ultimo_snapshot = None
+def monitorar(periodo=6):
+    global ultimo_snapshot
     while True:
         with status_lock:
             snapshot = " | ".join(f"{pid}:{estado}" for pid, estado in sorted(estados.items()))
-        imprimir("STATUS -> " + snapshot)
+        if snapshot != ultimo_snapshot:
+            imprimir("STATUS -> " + snapshot)
+            ultimo_snapshot = snapshot
         time.sleep(periodo)
 
 def main():
@@ -73,15 +77,14 @@ def main():
         t.start()
         threads.append(t)
 
-    mon = threading.Thread(target=monitorar, args=(4.0,), daemon=True)
+    mon = threading.Thread(target=monitorar, args=(6.0,), daemon=True)
     mon.start()
 
     try:
         while True:
-            time.sleep(10.0)
+            time.sleep(10)
     except KeyboardInterrupt:
         imprimir("Encerramento solicitado pelo usuário (Ctrl+C).")
 
 if __name__ == "__main__":
     main()
-
