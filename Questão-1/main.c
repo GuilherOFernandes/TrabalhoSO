@@ -9,7 +9,7 @@
 #define THROUGHPUT_WINDOW_T 100
 
 typedef struct {
-    char pid[5];                 // 4 chars + '\0'
+    char pid[5];               
     int tempo_chegada;
     int tempo_burst;
     int tempo_restante;
@@ -65,39 +65,32 @@ float calcular_std(float media, const int tempos[], int n) {
     return sqrtf(soma / (n > 1 ? (n - 1) : 1));
 }
 
-/* Exibe o Gantt em "caixinhas" alinhadas por colunas e embaixo imprime os tempos (início de cada bloco e o fim final) */
 void exibir_gantt() {
     if (gantt_count == 0) {
         printf("\n--- Diagrama de Gantt (vazio) ---\n");
         return;
     }
 
-    const int CELL_W = 8; // largura fixa por bloco (ajustável)
+    const int CELL_W = 8; 
     printf("\nDIAGRAMA DE GANTT:\n");
 
-    // linha com caixas | P01 | P02 | ...
     for (int i = 0; i < gantt_count; i++) {
-        printf("| %-*s ", CELL_W - 2, gantt_log[i].pid); // -2 para ajustar o espaço visual
+        printf("| %-*s ", CELL_W - 2, gantt_log[i].pid); 
     }
     printf("|\n");
 
-    // linha dos tempos: imprimimos o primeiro inicio seguido dos fins, alinhados
-    // Ex: 0    4    6   10 ...
     printf("%d", gantt_log[0].inicio);
     for (int i = 0; i < gantt_count; i++) {
-        // cada fim é impresso com largura CELL_W (alinhando sob cada caixa)
         printf("%*d", CELL_W, gantt_log[i].fim);
     }
     printf("\n");
 }
 
-/* Melhorias: tabela com colunas de largura fixa e cabeçalhos padronizados */
 void calcular_e_exibir_metricas(Processo p[], const char *algoritmo) {
     float total_tr = 0.0f, total_te = 0.0f;
     int tempos_tr[NUM_PROCESSOS];
     int tempos_te[NUM_PROCESSOS];
 
-    // recalcula retorno/espera (caso já estejam preenchidos)
     for (int i = 0; i < NUM_PROCESSOS; i++) {
         if (p[i].tempo_concluido != TEMPO_NAO_INICIADO)
             p[i].tempo_retorno = p[i].tempo_concluido - p[i].tempo_chegada;
@@ -110,7 +103,6 @@ void calcular_e_exibir_metricas(Processo p[], const char *algoritmo) {
             p[i].tempo_espera = TEMPO_NAO_INICIADO;
     }
 
-    // Cabeçalho padronizado
     const int PID_W = 4;
     const int CHEG_W = 8;
     const int BURST_W = 7;
@@ -118,27 +110,23 @@ void calcular_e_exibir_metricas(Processo p[], const char *algoritmo) {
     const int RET_W = 8;
     const int ESP_W = 7;
 
-    int table_width = PID_W + CHEG_W + BURST_W + CONCL_W + RET_W + ESP_W + 7 * 3; // + separadores e espaços (aprox)
+    int table_width = PID_W + CHEG_W + BURST_W + CONCL_W + RET_W + ESP_W + 7 * 3; 
 
-    // Linha de separador com largura aproximada
     for (int i = 0; i < 60; i++) putchar('=');
     printf("\n");
     printf("     RESULTADOS DO ESCALONAMENTO: %s\n", algoritmo);
     for (int i = 0; i < 60; i++) putchar('=');
     printf("\n");
 
-    // Cabeçalho da tabela com larguras fixas
     printf("| %-4s | %6s | %5s | %8s | %6s | %5s |\n",
            "PID", "Chegada", "Burst", "Conclusao", "Retorno", "Espera");
     printf("|------|--------|-------|----------|--------|-------|\n");
 
     for (int i = 0; i < NUM_PROCESSOS; i++) {
-        // segurança: se algum campo estiver não iniciado, imprime '-'
         const char *conclu = (p[i].tempo_concluido == TEMPO_NAO_INICIADO) ? "-" : "";
         const char *retorno = (p[i].tempo_retorno == TEMPO_NAO_INICIADO) ? "-" : "";
         const char *espera = (p[i].tempo_espera == TEMPO_NAO_INICIADO) ? "-" : "";
 
-        // se não iniciado usamos 0 para arrays de cálculo (evita garbage)
         int tr = (p[i].tempo_retorno == TEMPO_NAO_INICIADO) ? 0 : p[i].tempo_retorno;
         int te = (p[i].tempo_espera == TEMPO_NAO_INICIADO) ? 0 : p[i].tempo_espera;
 
@@ -147,7 +135,6 @@ void calcular_e_exibir_metricas(Processo p[], const char *algoritmo) {
         tempos_tr[i] = tr;
         tempos_te[i] = te;
 
-        // imprime linha formatada; quando campo for não iniciado, substitui por '-'
         if (p[i].tempo_concluido == TEMPO_NAO_INICIADO) {
             printf("| %-4s | %6d | %5d | %8s | %6s | %5s |\n",
                    p[i].pid,
@@ -190,11 +177,9 @@ void calcular_e_exibir_metricas(Processo p[], const char *algoritmo) {
     for (int i = 0; i < 60; i++) putchar('=');
     printf("\n");
 
-    // exibe gantt (formatado)
     exibir_gantt();
 }
 
-/* --- Simulações (mantive sua lógica, apenas uso log_gantt para registrar intervalos) --- */
 
 void simular_fcfs(Processo p[]) {
     int tempo_atual = 0;
